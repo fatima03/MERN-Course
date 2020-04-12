@@ -16,18 +16,15 @@ server.set('view engine', 'ejs');
 
 import serverRender from './serverRender';
 
-server.get('/', (req, res) => {
-    serverRender()
-        .then( ({ initialMarkup, initialData }) =>{
-            res.render('index',{
-                initialMarkup,
-                initialData
+server.get(['/', '/contests/:contestId'], (req, res) => {
+    serverRender(req.params.contestId)
+        .then(({ initialMarkup, initialData }) => {
+            res.render('index', {
+            initialMarkup,
+            initialData
             });
         })
-        .catch(console.error)
-    // res.render('index',{
-    //     content: 'Hello Express and <em>EJS</em>!'
-    // });
+        .catch(console.error);
 });
 
 // server.get('/about.html', (req, res) => {

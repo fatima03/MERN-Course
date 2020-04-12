@@ -7,17 +7,17 @@ import data from './testData';
 import App from './components/App';
 
 ReactDOM.render(
-    <App initialContests={window.initialData.contests} />,
+    <App initialData={window.initialData} />,
     document.getElementById('root')
 );
 
 
-// setTimeout(() =>{
-//     ReactDOM.render(
-//         <h2>...</h2>,
-//         document.getElementById('root')
-//     );
-// }, 4000);
+setTimeout(() =>{
+    ReactDOM.render(
+        <h2>Clear!</h2>,
+        document.getElementById('root')
+    );
+}, 4000);
 
 
 
