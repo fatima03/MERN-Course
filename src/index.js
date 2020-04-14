@@ -1,7 +1,6 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import axios from 'axios';
-import data from './testData';
 // console.log(data);
 
 import App from './components/App';
@@ -12,12 +11,12 @@ ReactDOM.render(
 );
 
 
-setTimeout(() =>{
-    ReactDOM.render(
-        <h2>Clear!</h2>,
-        document.getElementById('root')
-    );
-}, 4000);
+// setTimeout(() =>{
+//     ReactDOM.render(
+//         <h2>Clear!</h2>,
+//         document.getElementById('root')
+//     );
+// }, 4000);
 
 
 

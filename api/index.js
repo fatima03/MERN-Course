@@ -1,23 +1,85 @@
 import express from 'express';
-import data from '../src/testData'
+import { MongoClient, ObjectID } from 'mongodb';
+import assert from 'assert';
+import config from '../config';
+
+let mdb;
+MongoClient.connect(config.mongodbUri, (err, client) => {
+    assert.equal(null, err);
+    mdb = client.db("test");
+})
 
 const router = express.Router();
-const contests = data.contests.reduce((obj, contest) => {
-    obj[contest.id] = contest;
-    return obj;            
-}, {})
 
 router.get('/contests', (req, res) => {
-    res.send({ 
-        contests: contests
-    });
+    let contests={};
+    mdb.collection('contests').find({})
+        // .project({
+        //    // id: 1,
+        //     categoryName: 1,
+        //     contestName: 1
+        // })
+        .each((err, contest) => {
+            assert.equal(null,err);
+
+            if(!contest){
+                res.send({contests});
+                return;
+            }
+
+            contests[contest._id] = contest;
+        });  
 });
 
 router.get('/contests/:contestId', (req, res) => {
-    let contest = contests[req.params.contestId];
-    contest.description = `Hello Mr. Contest aka ${contest.contestName}`;
-    res.send(contest);
+    mdb.collection('contests')
+        .findOne({ _id: ObjectID(req.params.contestId)})
+        .then( contest => res.send(contest))
+        .catch(error => {
+            console.log(error);
+            res.status(404).send('Bad Request');
+        });
 });
 
+
+router.get('/names/:nameIds', (req, res) => {
+    const nameIds = req.params.nameIds.split(',').map(ObjectID);
+    let names={};
+    mdb.collection('names').find({ _id: {$in: nameIds}})
+        .each((err, name) => {
+            assert.equal(null,err);
+
+            if(!name){
+                res.send({names});
+                return;
+            }
+
+            names[name._id] = name;
+        });  
+});
+
+router.post('/names', (req, res) => {
+    // res.send(req.body);
+    const contestId = ObjectID( req.body.contestId);
+    const name = req.body.newName;
+    //Validation...
+    mdb.collection('names').insertOne({ name }).then(result => 
+        mdb.collection('contests').findAndModify(
+            { _id: contestId },
+            [],
+            { $push: { nameIds: result.insertedId } },
+            { new: true }
+        ).then(doc => 
+            res.send({
+                updatedContest: doc.value,
+                newName: { _id: result.insertedId, name }
+            })
+        )
+    )
+    .catch(error => {
+        console.log(error);
+        res.status(404).send('Bad Request');
+    });
+});
 
 export default router;
